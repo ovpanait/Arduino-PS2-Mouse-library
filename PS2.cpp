@@ -11,6 +11,23 @@ void MousePS2::set_output_low(uint8_t pin)
   digitalWrite(pin,LOW);
 }
 
+/* Odd parity */
+
+uint8_t MousePS2::get_parity(uint8_t val) {
+
+	uint8_t ones = 0;
+
+	while (val) {
+		ones++;
+		val &= (val - 1);
+	}
+
+	if (ones & 1)
+		return 0x00;
+
+	return 0x01;
+}
+
 void MousePS2::send_command(uint8_t data){
 
 /* "Request-to-send" state  */
@@ -57,17 +74,27 @@ uint8_t MousePS2::get_result (){
 	*/
 	
 	/* Start bit */
-	
+	uint8_t parity;
+
 	while(digitalRead(clk_pin)==HIGH);
 	while(digitalRead(clk_pin)==LOW);
 	
 	/* Data bits */
 	
-	uint8_t value = receive_byte();
+	uint8_t value = receive_byte(parity);
 	
 	/* Stop bit */
 	
 	while(digitalRead(clk_pin)==LOW);
+
+	/* Test parity and issue resend command if necessary*/
+
+	if (parity != get_parity(value))
+	{
+		Serial.println("Requesting resend. Parity not good.");
+		send_command(RESEND);
+		return get_result();
+	}
 
 	return value;
 }
@@ -107,8 +134,8 @@ while(digitalRead(clk_pin)==HIGH);
   
 }
 
-/* Receive 8 data + 1 parity */
-uint8_t MousePS2::receive_byte(){
+/* Receive 8 data bits  + 1 parity bit */
+uint8_t MousePS2::receive_byte(uint8_t &parity){
 	
 	uint8_t received=0x00;
 	uint8_t mask =0x01;
@@ -128,11 +155,11 @@ uint8_t MousePS2::receive_byte(){
 	
 /* Receive parity bit */
 
- uint8_t parity = digitalRead(data_pin);
- while(digitalRead(clk_pin)==LOW);
- while(digitalRead(clk_pin)==HIGH);
+	parity = digitalRead(data_pin);
+	while(digitalRead(clk_pin)==LOW);
+	while(digitalRead(clk_pin)==HIGH);
  
- return received;
+	return received;
 }
 
 void MousePS2::init(uint8_t mode){

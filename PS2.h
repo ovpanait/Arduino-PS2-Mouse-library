@@ -21,6 +21,7 @@ Blue - VCC
 #define ENABLE_DATA_REPORTING 0xF4
 #define SET_STREAM_MODE 0xEA
 #define REMOTE_MODE 0xF0
+#define RESEND 0xFE
 
 #include <Arduino.h>
 
@@ -43,10 +44,14 @@ public:
 	void set_input_high(uint8_t);
 	void set_output_low(uint8_t);
 	
+	/* Test parity */
+
+	uint8_t get_parity(uint8_t);
+
 	/* Send & Receive bytes to/from the PS2 device */
 	
 	void send_byte(const uint8_t);
-	uint8_t receive_byte();
+	uint8_t receive_byte(uint8_t&);
 	
 	/* Initialize and communicate with the device */
 	
