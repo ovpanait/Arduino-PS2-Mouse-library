@@ -194,14 +194,23 @@ byte 3: y movement
 void MousePS2::remote_mode_request(){
 	send_command(READ_DATA);
 	get_result(); // Acknowledge request
-	Serial.println((int8_t)get_result()); 
-	Serial.println((int8_t)get_result());
-	Serial.println((int8_t)get_result());
+	mov_data[0] = get_result();
+	mov_data[1] = get_result();
+	mov_data[2] = get_result();
+}
+
+void MousePS2::serial_write_mov() {
+	remote_mode_request();
+	Serial.println(mov_data[0]);
+	Serial.println(mov_data[1]);
+	Serial.println(mov_data[2]);
 }
 
 /* Mouse will send data each time it registers movement */
 
 void MousePS2::stream_mode_receive(){
 	while(digitalRead(clk_pin)==HIGH);
-	get_result();
+	mov_data[0] = get_result();
+	mov_data[1] = get_result();
+	mov_data[2] = get_result();
 }

@@ -29,6 +29,7 @@ class MousePS2{
 	
 	uint8_t clk_pin;
 	uint8_t data_pin;
+	uint8_t mov_data[3];
 	
 public:
 	
@@ -56,13 +57,14 @@ public:
 	/* Initialize and communicate with the device */
 	
 	void init(uint8_t);
-	uint8_t get_result();
 	void send_command(const uint8_t);
+	uint8_t get_result();
 	
 	/* Modes of operation */
 	
 	void remote_mode_request();
 	void stream_mode_receive();
+	void serial_write_mov();
 	
 };
 
